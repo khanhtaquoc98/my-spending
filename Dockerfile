@@ -1,17 +1,19 @@
-# Use official Python runtime as a parent image
-FROM python:3.9-slim
+# Use explicit debian release
+FROM python:3.10-slim-bookworm
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV PORT=5000
+ENV DEBIAN_FRONTEND=noninteractive
 
 # Install Tesseract OCR and Vietnamese language data, plus OpenCV required libs
-RUN apt-get update && apt-get install -y \
+RUN apt-get update -y && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     tesseract-ocr-vie \
     libgl1-mesa-glx \
     libglib2.0-0 \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
