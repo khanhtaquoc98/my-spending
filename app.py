@@ -28,7 +28,10 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev-secret-key-change-me')
 CORS(app)
 
-UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
+if os.getenv('VERCEL'):
+    UPLOAD_FOLDER = '/tmp/uploads'
+else:
+    UPLOAD_FOLDER = os.path.join(os.path.dirname(__file__), 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'tiff'}
