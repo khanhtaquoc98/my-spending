@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo - MySpending</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/dayjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/isoWeek.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs@1/plugin/isSameOrAfter.js"></script>
+    <style>
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .report-filters button {
+            background: var(--bg-hover);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            margin-right: 8px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .report-filters button.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .report-table-wrapper {
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        .report-table th, .report-table td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .report-table th {
+            background: var(--bg-hover);
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 0.05em;
+        }
+        .report-table tr:last-child td {
+            border-bottom: none;
+        }
+        .amount-cell {
+            text-align: right;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon"><i data-lucide="wallet" style="width:20px;height:20px;color:#fff"></i></div>
+                <span class="logo-text">MySpending</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/" class="nav-item">
+                <span class="nav-icon"><i data-lucide="bar-chart-3" style="width:18px;height:18px"></i></span>
+                <span>Dashboard</span>
+            </a>
+            <a href="/reports" class="nav-item active">
+                <span class="nav-icon"><i data-lucide="calendar-check" style="width:18px;height:18px"></i></span>
+                <span>Báo cáo</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item" id="logoutBtn">
+                <span class="nav-icon"><i data-lucide="log-out" style="width:18px;height:18px"></i></span>
+                <span>Đăng xuất</span>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="top-header">
+            <button class="menu-toggle" id="menuToggle"><i data-lucide="menu" style="width:22px;height:22px"></i></button>
+            <h1 class="page-title">Chi tiết báo cáo</h1>
+        </header>
+
+        <section style="padding: 24px;">
+            <div class="report-header">
+                <div class="report-filters">
+                    <button class="filter-btn active" data-period="day">Theo Ngày</button>
+                    <button class="filter-btn" data-period="week">Theo Tuần</button>
+                    <button class="filter-btn" data-period="month">Theo Tháng</button>
+                    <button class="filter-btn" data-period="year">Theo Năm</button>
+                </div>
+            </div>
+
+            <div class="report-table-wrapper">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th id="periodColHeader">Thời gian</th>
+                            <th>Số lượng GD</th>
+                            <th style="text-align: right;">Tổng tiền</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                        <tr><td colspan="3" style="text-align: center; padding: 32px; color: var(--text-secondary);">Đang tải dữ liệu...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        dayjs.extend(window.dayjs_plugin_isoWeek);
+        
+        let allRecords = [];
+        let currentPeriod = 'day';
+
+        lucide.createIcons();
+
+        // ─── Setup Sidebar ──────────────────────────────────────────────────
+        document.getElementById('menuToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.add('active');
+            document.getElementById('sidebarOverlay').classList.add('active');
+        });
+        document.getElementById('sidebarOverlay').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        });
+        document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await fetch('/api/auth/logout', { method: 'POST', headers: getHeaders() });
+            localStorage.removeItem('auth_token');
+            window.location.href = '/login';
+        });
+
+        function getHeaders() {
+            const token = localStorage.getItem('auth_token');
+            return token ? { 'Authorization': `Bearer ${token}` } : {};
+        }
+
+        const formatMoney = (amount) => {
+            if (!amount) return '0đ';
+            return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+        };
+
+        // ─── Data Loading & Grouping ─────────────────────────────────────────
+
+        async function fetchRecords() {
+            try {
+                // Fetch up to 1000 records for reporting
+                const res = await fetch('/api/records?limit=1000', { headers: getHeaders() });
+                if (res.status === 401) {
+                    window.location.href = '/login';
+                    return;
+                }
+                const data = await res.json();
+                if (data.status === 'success') {
+                    allRecords = data.records;
+                    renderReport();
+                }
+            } catch (error) {
+                console.error("Lỗi:", error);
+                document.getElementById('reportTableBody').innerHTML = `<tr><td colspan="3" style="text-align: center; color: var(--danger);">Không thể tải dữ liệu</td></tr>`;
+            }
+        }
+
+        function renderReport() {
+            const groups = {};
+
+            allRecords.forEach(record => {
+                const date = dayjs(record.created_at);
+                let key = '';
+                let display = '';
+
+                if (currentPeriod === 'day') {
+                    key = date.format('YYYY-MM-DD');
+                    display = date.format('DD/MM/YYYY');
+                } else if (currentPeriod === 'week') {
+                    key = date.format('YYYY-ww');
+                    display = `Tuần ${date.isoWeek()} - ${date.format('YYYY')}`;
+                } else if (currentPeriod === 'month') {
+                    key = date.format('YYYY-MM');
+                    display = `Tháng ${date.format('MM/YYYY')}`;
+                } else if (currentPeriod === 'year') {
+                    key = date.format('YYYY');
+                    display = `Năm ${date.format('YYYY')}`;
+                }
+
+                if (!groups[key]) {
+                    groups[key] = { display, count: 0, total: 0, sortKey: key };
+                }
+                groups[key].count++;
+                groups[key].total += (record.amount || 0);
+            });
+
+            // Sort newest first
+            const sorted = Object.values(groups).sort((a, b) => b.sortKey.localeCompare(a.sortKey));
+
+            const tbody = document.getElementById('reportTableBody');
+            if (sorted.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align: center; padding: 32px; color: var(--text-secondary);">Chưa có dữ liệu</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = sorted.map(g => `
+                <tr>
+                    <td style="font-weight: 500; color: var(--text-primary);">${g.display}</td>
+                    <td>${g.count} giao dịch</td>
+                    <td class="amount-cell">${formatMoney(g.total)}</td>
+                </tr>
+            `).join('');
+
+            // Update column header
+            const headers = {
+                'day': 'Ngày',
+                'week': 'Tuần',
+                'month': 'Tháng',
+                'year': 'Năm'
+            };
+            document.getElementById('periodColHeader').innerText = headers[currentPeriod];
+        }
+
+        // ─── Filter Events ──────────────────────────────────────────────────
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                const target = e.target;
+                target.classList.add('active');
+                currentPeriod = target.dataset.period;
+                renderReport();
+            });
+        });
+
+        // Init
+        fetchRecords();
+    </script>
+</body>
+</html>

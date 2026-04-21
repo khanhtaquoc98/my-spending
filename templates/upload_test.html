@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Test - MySpending</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0a14;
+            color: #f0f0f5;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 20px;
+            padding: 2.5rem;
+        }
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        p.desc { color: #8b8ba3; margin-bottom: 2rem; font-size: 0.9rem; }
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; font-weight: 500; font-size: 0.9rem; color: #8b8ba3; }
+        input[type="file"] {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255,255,255,0.04);
+            border: 2px dashed rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #f0f0f5;
+            cursor: pointer;
+        }
+        textarea {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            color: #f0f0f5;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            outline: none;
+        }
+        textarea:focus { border-color: #6366f1; }
+        .btn {
+            padding: 0.85rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(99,102,241,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(99,102,241,0.4); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-row { display: flex; gap: 0.75rem; margin-top: 1rem; }
+        .btn-success {
+            flex: 1;
+            background: linear-gradient(135deg, #10b981, #06b6d4);
+            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+        }
+        .btn-retry {
+            flex: 1;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #8b8ba3;
+        }
+        .btn-retry:hover { background: rgba(255,255,255,0.08); color: #f0f0f5; }
+        .result {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px;
+            animation: slideUp 0.4s ease;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        .result-icon { font-size: 2rem; }
+        .result-label { font-weight: 600; font-size: 1.1rem; }
+        .result-conf { margin-left: auto; font-size: 0.85rem; color: #8b8ba3; }
+        .result-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+        .result-item {
+            padding: 0.6rem 0.75rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+        .result-key { font-size: 0.7rem; color: #5a5a72; text-transform: uppercase; letter-spacing: 0.05em; }
+        .result-val { font-size: 0.9rem; font-weight: 500; margin-top: 0.15rem; }
+        .saved-msg {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            background: rgba(16,185,129,0.1);
+            border: 1px solid rgba(16,185,129,0.2);
+            border-radius: 10px;
+            color: #34d399;
+            font-size: 0.9rem;
+            text-align: center;
+            animation: slideUp 0.3s ease;
+        }
+        .back { display: inline-block; margin-bottom: 1rem; color: #6366f1; text-decoration: none; font-size: 0.9rem; }
+        .back:hover { text-decoration: underline; }
+        .loading { display: inline-block; width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.2); border-top-color: white; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back">← Dashboard</a>
+        <h1>🔬 Upload Test</h1>
+        <p class="desc">Test webhook endpoint — quét hình ảnh và confirm kết quả</p>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label>Chọn hình ảnh:</label>
+                <input type="file" id="imageFile" accept="image/*" required>
+            </div>
+            <div class="form-group">
+                <label>Ghi chú (tùy chọn):</label>
+                <textarea id="note" placeholder="Nhập ghi chú..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary" id="submitBtn">📤 Upload & Detect</button>
+        </form>
+        <div id="resultArea"></div>
+    </div>
+    <script>
+        const TYPE_CONFIG = {
+            bank_transfer: { icon: '🏦', label: 'Chuyển khoản', color: '#06b6d4' },
+            momo:          { icon: '💜', label: 'MoMo',         color: '#8b5cf6' },
+            shopee:        { icon: '🟠', label: 'Shopee',       color: '#f59e0b' },
+            tiktok:        { icon: '🎵', label: 'TikTok',       color: '#ec4899' },
+            bill:          { icon: '🧾', label: 'Bill/Hóa đơn', color: '#10b981' },
+            unknown:       { icon: '❓', label: 'Không xác định', color: '#6b7280' },
+        };
+
+        let lastRecordData = null;
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await uploadAndDetect();
+        });
+
+        async function uploadAndDetect() {
+            const btn = document.getElementById('submitBtn');
+            const file = document.getElementById('imageFile').files[0];
+            if (!file) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Đang phân tích...';
+            document.getElementById('resultArea').innerHTML = '';
+
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('note', document.getElementById('note').value);
+
+            try {
+                const res = await fetch('/api/webhook', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    lastRecordData = data.record_data;
+                    showResult(data);
+                } else {
+                    document.getElementById('resultArea').innerHTML =
+                        `<div class="result"><p style="color:#f87171">❌ ${data.error}</p></div>`;
+                }
+            } catch (err) {
+                document.getElementById('resultArea').innerHTML =
+                    `<div class="result"><p style="color:#f87171">❌ ${err.message}</p></div>`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📤 Upload & Detect';
+            }
+        }
+
+        function showResult(data) {
+            const cls = data.classification;
+            const ext = data.extracted_data || {};
+            const cfg = TYPE_CONFIG[cls.type] || TYPE_CONFIG.unknown;
+
+            let gridItems = [
+                ['Loại', cfg.label],
+                ['Độ tin cậy', `${Math.round(cls.confidence)}%`],
+                ['Số tiền', ext.amount ? `${Math.round(ext.amount).toLocaleString('vi-VN')}đ` : 'N/A'],
+                ['OCR', `${data.ocr.confidence}%`],
+            ];
+            if (ext.transaction_id) gridItems.push(['Mã GD', ext.transaction_id]);
+            if (ext.order_id) gridItems.push(['Mã đơn', ext.order_id]);
+            if (ext.sender) gridItems.push(['Người gửi', ext.sender]);
+            if (ext.receiver) gridItems.push(['Người nhận', ext.receiver]);
+
+            const gridHtml = gridItems.map(([k, v]) =>
+                `<div class="result-item"><div class="result-key">${k}</div><div class="result-val">${v}</div></div>`
+            ).join('');
+
+            document.getElementById('resultArea').innerHTML = `
+                <div class="result" id="resultCard">
+                    <div class="result-header">
+                        <span class="result-icon">${cfg.icon}</span>
+                        <span class="result-label" style="color:${cfg.color}">${cfg.label}</span>
+                        <span class="result-conf">${Math.round(cls.confidence)}%</span>
+                    </div>
+                    <div class="result-grid">${gridHtml}</div>
+                    <div class="btn-row">
+                        <button class="btn btn-success" onclick="confirmSave()">✅ OK - Lưu lại</button>
+                        <button class="btn btn-retry" onclick="retryUpload()">🔄 Thử lại</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function confirmSave() {
+            if (!lastRecordData) return;
+
+            try {
+                const res = await fetch('/api/webhook/confirm', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(lastRecordData),
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    const card = document.getElementById('resultCard');
+                    // Remove buttons and add saved message
+                    const btnRow = card.querySelector('.btn-row');
+                    if (btnRow) btnRow.remove();
+                    card.insertAdjacentHTML('beforeend',
+                        `<div class="saved-msg">✅ Đã lưu thành công! Record #${data.record?.id || ''}</div>`
+                    );
+                    lastRecordData = null;
+                }
+            } catch (err) {
+                alert('Lỗi: ' + err.message);
+            }
+        }
+
+        function retryUpload() {
+            lastRecordData = null;
+            document.getElementById('resultArea').innerHTML = '';
+            document.getElementById('imageFile').value = '';
+            document.getElementById('imageFile').click();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySpending Dashboard</title>
+    <meta name="description" content="Dashboard thống kê phân loại hình ảnh bill, chuyển khoản, MoMo, Shopee, TikTok">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+    <!-- Sidebar Overlay (mobile) -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <div class="logo-icon"><i data-lucide="wallet" style="width:20px;height:20px;color:#fff"></i></div>
+                <span class="logo-text">MySpending</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-tab="overview">
+                <span class="nav-icon"><i data-lucide="bar-chart-3" style="width:18px;height:18px"></i></span>
+                <span>Tổng quan</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="records">
+                <span class="nav-icon"><i data-lucide="list" style="width:18px;height:18px"></i></span>
+                <span>Lịch sử</span>
+            </a>
+            <a href="/reports" class="nav-item">
+                <span class="nav-icon"><i data-lucide="calendar-check" style="width:18px;height:18px"></i></span>
+                <span>Báo cáo</span>
+            </a>
+            <a href="#" class="nav-item" data-tab="upload">
+                <span class="nav-icon"><i data-lucide="upload" style="width:18px;height:18px"></i></span>
+                <span>Upload</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="#" class="nav-item" id="logoutBtn">
+                <span class="nav-icon"><i data-lucide="log-out" style="width:18px;height:18px"></i></span>
+                <span>Đăng xuất</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="top-header">
+            <button class="menu-toggle" id="menuToggle"><i data-lucide="menu" style="width:22px;height:22px"></i></button>
+            <h1 class="page-title" id="pageTitle">Tổng quan</h1>
+            <div class="header-actions">
+                <button class="btn btn-primary btn-icon" id="refreshBtn" title="Refresh">
+                    <i data-lucide="refresh-cw" style="width:16px;height:16px"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Overview Tab -->
+        <section class="tab-content active" id="tab-overview">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card stat-total">
+                    <div class="stat-icon"><i data-lucide="package" style="width:28px;height:28px;color:#6366f1"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statTotal">0</span>
+                        <span class="stat-label">Tổng records</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-today">
+                    <div class="stat-icon"><i data-lucide="calendar" style="width:28px;height:28px;color:#06b6d4"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statToday">0</span>
+                        <span class="stat-label">Hôm nay</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-week">
+                    <div class="stat-icon"><i data-lucide="calendar-range" style="width:28px;height:28px;color:#10b981"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statWeek">0</span>
+                        <span class="stat-label">Tuần này</span>
+                    </div>
+                </div>
+                <div class="stat-card stat-amount">
+                    <div class="stat-icon"><i data-lucide="banknote" style="width:28px;height:28px;color:#f59e0b"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-value" id="statAmount">0đ</span>
+                        <span class="stat-label">Tổng số tiền</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h3 class="chart-title">Phân loại theo loại</h3>
+                    <div class="chart-container">
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h3 class="chart-title">Số tiền theo loại</h3>
+                    <div class="chart-container">
+                        <canvas id="amountChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Trend Chart -->
+            <div class="chart-card chart-full">
+                <h3 class="chart-title">Xu hướng 30 ngày</h3>
+                <div class="chart-container chart-container-wide">
+                    <canvas id="trendChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Type Breakdown -->
+            <div class="type-breakdown" id="typeBreakdown"></div>
+        </section>
+
+        <!-- Records Tab -->
+        <section class="tab-content" id="tab-records">
+            <div class="records-toolbar">
+                <div class="filter-group">
+                    <select id="filterType" class="filter-select">
+                        <option value="all">Tất cả loại</option>
+                        <option value="bank_transfer">Chuyển khoản</option>
+                        <option value="momo">MoMo</option>
+                        <option value="shopee">Shopee</option>
+                        <option value="tiktok">TikTok</option>
+                        <option value="bill">Bill/Hóa đơn</option>
+                        <option value="unknown">Không xác định</option>
+                    </select>
+                </div>
+                <div class="records-count" id="recordsCount">0 kết quả</div>
+            </div>
+            <div class="records-list" id="recordsList"></div>
+            <div class="load-more-wrapper">
+                <button class="btn btn-secondary" id="loadMoreBtn" style="display:none;">Tải thêm</button>
+            </div>
+        </section>
+
+        <!-- Upload Tab -->
+        <section class="tab-content" id="tab-upload">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-zone" id="dropZone">
+                    <div class="upload-icon"><i data-lucide="image-plus" style="width:48px;height:48px;color:#6366f1"></i></div>
+                    <h3>Kéo thả hình ảnh vào đây</h3>
+                    <p>hoặc click để chọn file</p>
+                    <p class="upload-hint">Hỗ trợ: PNG, JPG, JPEG, GIF, WebP, BMP, TIFF</p>
+                    <input type="file" id="fileInput" accept="image/*" multiple hidden>
+                </div>
+                <div class="upload-note-field">
+                    <label for="uploadNote">Ghi chú (tùy chọn):</label>
+                    <textarea id="uploadNote" placeholder="Thêm ghi chú cho ảnh..."></textarea>
+                </div>
+                <div class="upload-results" id="uploadResults"></div>
+            </div>
+        </section>
+
+        <!-- Record Detail Modal -->
+        <div class="modal-overlay" id="modalOverlay">
+            <div class="modal" id="recordModal">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="modalTitle">Chi tiết</h3>
+                    <button class="modal-close" id="modalClose">
+                        <i data-lucide="x" style="width:18px;height:18px"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="modalBody"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Sidebar overlay toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                sidebar.classList.toggle('open');
+                overlay.classList.toggle('active');
+            });
+        }
+        if (overlay) {
+            overlay.addEventListener('click', () => {
+                sidebar.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+        }
+
+        // Logout
+        document.getElementById('logoutBtn')?.addEventListener('click', async (e) => {
+            e.preventDefault();
+            await fetch('/api/auth/logout', { method: 'POST' });
+            window.location.href = '/login';
+        });
+    </script>
+</body>
+</html>

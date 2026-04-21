@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - MySpending</title>
+    <meta name="description" content="Đăng nhập vào MySpending Dashboard">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f6fa;
+            color: #1a1a2e;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        /* Subtle background pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.04) 0%, transparent 50%),
+                radial-gradient(circle at 50% 80%, rgba(6, 182, 212, 0.03) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-logo {
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+            color: white;
+        }
+
+        .login-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.5rem;
+            color: #1a1a2e;
+        }
+
+        .login-subtitle {
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .login-card {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        /* Steps */
+        .login-step {
+            display: none;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .login-step.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .step-indicator {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-bottom: 1.75rem;
+        }
+
+        .step-dot {
+            width: 32px;
+            height: 4px;
+            border-radius: 2px;
+            background: #e5e7eb;
+            transition: all 0.3s;
+        }
+
+        .step-dot.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            width: 48px;
+        }
+
+        .step-dot.done {
+            background: #10b981;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            color: #1a1a2e;
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: #ffffff;
+        }
+
+        .form-input::placeholder {
+            color: #9ca3af;
+        }
+
+        /* OTP input */
+        .otp-container {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .otp-input {
+            width: 48px;
+            height: 56px;
+            text-align: center;
+            font-size: 1.4rem;
+            font-weight: 600;
+            background: #f9fafb;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            color: #1a1a2e;
+            font-family: inherit;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .otp-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: #ffffff;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-text {
+            background: none;
+            color: #6b7280;
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-text:hover {
+            color: #1a1a2e;
+        }
+
+        .error-msg {
+            background: rgba(239, 68, 68, 0.06);
+            border: 1px solid rgba(239, 68, 68, 0.15);
+            border-radius: 10px;
+            padding: 0.65rem 1rem;
+            font-size: 0.85rem;
+            color: #dc2626;
+            margin-bottom: 1rem;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .error-msg.visible { display: block; }
+
+        .success-msg {
+            background: rgba(16, 185, 129, 0.06);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+            border-radius: 10px;
+            padding: 0.65rem 1rem;
+            font-size: 0.85rem;
+            color: #059669;
+            margin-bottom: 1rem;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .success-msg.visible { display: block; }
+
+        .otp-info {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .otp-info-icon {
+            margin-bottom: 0.75rem;
+            display: flex;
+            justify-content: center;
+            color: #6366f1;
+        }
+
+        .otp-info h3 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+        }
+
+        .otp-info p {
+            color: #6b7280;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        .resend-link {
+            text-align: center;
+            margin-top: 1rem;
+        }
+
+        .resend-link a {
+            color: #6366f1;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .resend-link a:hover {
+            text-decoration: underline;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .telegram-hint {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .telegram-hint p {
+            color: #9ca3af;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .telegram-hint code {
+            background: #f3f4f6;
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #6366f1;
+        }
+
+        .telegram-hint a {
+            color: #6366f1;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="login-logo"><i data-lucide="wallet" style="width:28px;height:28px"></i></div>
+            <h1 class="login-title">MySpending</h1>
+            <p class="login-subtitle">Đăng nhập để truy cập dashboard</p>
+        </div>
+
+        <div class="login-card">
+            <div class="step-indicator">
+                <div class="step-dot active" id="dot1"></div>
+                <div class="step-dot" id="dot2"></div>
+            </div>
+
+            <!-- Step 1: Username & Password -->
+            <div class="login-step active" id="step1">
+                <div class="error-msg" id="step1Error"></div>
+
+                <div class="form-group">
+                    <label class="form-label" for="username">Username</label>
+                    <input type="text" class="form-input" id="username"
+                           placeholder="Nhập username" autocomplete="username" autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input type="password" class="form-input" id="password"
+                           placeholder="Nhập password" autocomplete="current-password">
+                </div>
+
+                <button class="btn btn-primary" id="loginBtn" onclick="handleLogin()">
+                    Đăng nhập
+                </button>
+
+                <div class="telegram-hint">
+                    <p>Chưa có tài khoản? Gửi <code>/register</code> cho Bot trên Telegram để đăng ký.</p>
+                </div>
+            </div>
+
+            <!-- Step 2: OTP Verification -->
+            <div class="login-step" id="step2">
+                <div class="error-msg" id="step2Error"></div>
+                <div class="success-msg" id="step2Success"></div>
+
+                <div class="otp-info">
+                    <span class="otp-info-icon"><i data-lucide="smartphone" style="width:40px;height:40px"></i></span>
+                    <h3>Nhập mã OTP</h3>
+                    <p>Mã 6 số đã được gửi đến Telegram của bạn</p>
+                </div>
+
+                <div class="otp-container" id="otpContainer">
+                    <input type="text" class="otp-input" maxlength="1" data-index="0" inputmode="numeric">
+                    <input type="text" class="otp-input" maxlength="1" data-index="1" inputmode="numeric">
+                    <input type="text" class="otp-input" maxlength="1" data-index="2" inputmode="numeric">
+                    <input type="text" class="otp-input" maxlength="1" data-index="3" inputmode="numeric">
+                    <input type="text" class="otp-input" maxlength="1" data-index="4" inputmode="numeric">
+                    <input type="text" class="otp-input" maxlength="1" data-index="5" inputmode="numeric">
+                </div>
+
+                <button class="btn btn-primary" id="verifyBtn" onclick="handleVerify()" disabled>
+                    Xác nhận
+                </button>
+
+                <div class="resend-link">
+                    <a onclick="handleResend()">Gửi lại mã OTP</a>
+                </div>
+
+                <button class="btn btn-text" onclick="goBackToStep1()">
+                    ← Quay lại
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+        let currentUsername = '';
+
+        // ─── OTP Input Logic ──────────────────────────────────────
+
+        const otpInputs = document.querySelectorAll('.otp-input');
+
+        otpInputs.forEach((input, i) => {
+            input.addEventListener('input', (e) => {
+                const val = e.target.value.replace(/\D/g, '');
+                e.target.value = val;
+
+                if (val && i < otpInputs.length - 1) {
+                    otpInputs[i + 1].focus();
+                }
+
+                checkOtpComplete();
+            });
+
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.value && i > 0) {
+                    otpInputs[i - 1].focus();
+                }
+                if (e.key === 'Enter') {
+                    handleVerify();
+                }
+            });
+
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasted = (e.clipboardData.getData('text') || '').replace(/\D/g, '').slice(0, 6);
+                pasted.split('').forEach((char, j) => {
+                    if (otpInputs[j]) otpInputs[j].value = char;
+                });
+                if (pasted.length > 0) {
+                    otpInputs[Math.min(pasted.length, 5)].focus();
+                }
+                checkOtpComplete();
+            });
+        });
+
+        function checkOtpComplete() {
+            const otp = getOtpValue();
+            document.getElementById('verifyBtn').disabled = otp.length !== 6;
+        }
+
+        function getOtpValue() {
+            return Array.from(otpInputs).map(i => i.value).join('');
+        }
+
+        function clearOtp() {
+            otpInputs.forEach(i => { i.value = ''; });
+            otpInputs[0].focus();
+            document.getElementById('verifyBtn').disabled = true;
+        }
+
+        // ─── Enter key handler for Step 1 ──────────────────────────
+
+        document.getElementById('username').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('password').focus();
+        });
+
+        document.getElementById('password').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+
+        // ─── Step Navigation ─────────────────────────────────────
+
+        function showStep(step) {
+            document.querySelectorAll('.login-step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+
+            document.getElementById('dot1').className = `step-dot ${step >= 1 ? (step > 1 ? 'done' : 'active') : ''}`;
+            document.getElementById('dot2').className = `step-dot ${step >= 2 ? 'active' : ''}`;
+        }
+
+        function goBackToStep1() {
+            showStep(1);
+            hideError('step2Error');
+        }
+
+        // ─── Error/Success ──────────────────────────────────────
+
+        function showError(id, msg) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.classList.add('visible');
+        }
+
+        function hideError(id) {
+            document.getElementById(id).classList.remove('visible');
+        }
+
+        function showSuccess(id, msg) {
+            const el = document.getElementById(id);
+            el.textContent = msg;
+            el.classList.add('visible');
+        }
+
+        // ─── Login Step 1 ───────────────────────────────────────
+
+        async function handleLogin() {
+            const btn = document.getElementById('loginBtn');
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            hideError('step1Error');
+
+            if (!username || !password) {
+                showError('step1Error', 'Vui lòng nhập username và password');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> Đang xác thực...';
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password }),
+                });
+                const data = await res.json();
+
+                if (data.status === 'success' && data.requires_otp) {
+                    currentUsername = username;
+                    showStep(2);
+                    showSuccess('step2Success', 'Mã OTP đã gửi đến Telegram!');
+                    setTimeout(() => otpInputs[0].focus(), 300);
+                } else {
+                    showError('step1Error', data.error || 'Đăng nhập thất bại');
+                }
+            } catch (err) {
+                showError('step1Error', 'Lỗi kết nối server');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Đăng nhập';
+            }
+        }
+
+        // ─── Verify OTP (Step 2) ────────────────────────────────
+
+        async function handleVerify() {
+            const btn = document.getElementById('verifyBtn');
+            const otp = getOtpValue();
+
+            hideError('step2Error');
+            document.getElementById('step2Success').classList.remove('visible');
+
+            if (otp.length !== 6) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading-spinner"></span> Đang xác nhận...';
+
+            try {
+                const res = await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUsername, otp }),
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    btn.innerHTML = '✅ Thành công!';
+                    btn.style.background = 'linear-gradient(135deg, #10b981, #06b6d4)';
+                    setTimeout(() => { window.location.href = '/'; }, 800);
+                } else {
+                    showError('step2Error', data.error || 'Mã OTP không đúng');
+                    clearOtp();
+                    btn.disabled = false;
+                    btn.innerHTML = 'Xác nhận';
+                }
+            } catch (err) {
+                showError('step2Error', 'Lỗi kết nối server');
+                btn.disabled = false;
+                btn.innerHTML = 'Xác nhận';
+            }
+        }
+
+        // ─── Resend OTP ─────────────────────────────────────────
+
+        async function handleResend() {
+            const password = document.getElementById('password').value;
+            hideError('step2Error');
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUsername, password }),
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    showSuccess('step2Success', '✅ Mã OTP mới đã gửi đến Telegram!');
+                    clearOtp();
+                } else {
+                    showError('step2Error', data.error || 'Không thể gửi lại OTP');
+                }
+            } catch (err) {
+                showError('step2Error', 'Lỗi kết nối server');
+            }
+        }
+    </script>
+</body>
+</html>
