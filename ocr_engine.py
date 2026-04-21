@@ -114,7 +114,7 @@ def extract_text_with_confidence(image_path: str) -> dict:
             lang='vie+eng',
             config='--psm 4',
             output_type=pytesseract.Output.DICT,
-            timeout=30
+            timeout=120
         )
     except pytesseract.TesseractError:
         try:
@@ -123,7 +123,7 @@ def extract_text_with_confidence(image_path: str) -> dict:
                 lang='eng',
                 config='--psm 4',
                 output_type=pytesseract.Output.DICT,
-                timeout=30
+                timeout=120
             )
         except pytesseract.TesseractError:
             data = pytesseract.image_to_data(
